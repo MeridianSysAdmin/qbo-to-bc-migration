@@ -4,8 +4,8 @@ Usage:
     python reconcile.py            # run every check
     python reconcile.py --break    # break test: tamper with one expected number and prove a check FAILS
 
-Needs these set (see docs/RECONCILE.md for the one-time setup):
-    BC_TENANT_ID, BC_CLIENT_ID, BC_CLIENT_SECRET, BC_ENVIRONMENT (e.g. Production), BC_COMPANY (e.g. Craigs Landscaping MIG)
+Needs these set (see docs/RECONCILE.md). Leave BC_CLIENT_SECRET unset to sign in as yourself:
+    BC_TENANT_ID, BC_CLIENT_ID, [BC_CLIENT_SECRET], BC_ENVIRONMENT (e.g. Production), BC_COMPANY (e.g. Craigs Landscaping MIG)
 
 Checks (plain version):
 1. Record counts: same number of accounts, customers, vendors and items as went in.
@@ -29,12 +29,21 @@ CLEARING_NO = "3900"
 
 # ---------------------------------------------------------------- BC API
 tenant = os.environ["BC_TENANT_ID"]
-app = msal.ConfidentialClientApplication(
-    os.environ["BC_CLIENT_ID"],
-    authority=f"https://login.microsoftonline.com/{tenant}",
-    client_credential=os.environ["BC_CLIENT_SECRET"],
-)
-token = app.acquire_token_for_client(scopes=["https://api.businesscentral.dynamics.com/.default"])
+authority = f"https://login.microsoftonline.com/{tenant}"
+scopes = ["https://api.businesscentral.dynamics.com/.default"]
+if os.environ.get("BC_CLIENT_SECRET"):
+    # App-only sign-in (needs an admin to grant consent).
+    app = msal.ConfidentialClientApplication(os.environ["BC_CLIENT_ID"], authority=authority,
+                                             client_credential=os.environ["BC_CLIENT_SECRET"])
+    token = app.acquire_token_for_client(scopes=scopes)
+else:
+    # Sign in as yourself with a one-time code (no admin needed). Reads BC with your own BC permissions.
+    app = msal.PublicClientApplication(os.environ["BC_CLIENT_ID"], authority=authority)
+    flow = app.initiate_device_flow(scopes=scopes)
+    if "user_code" not in flow:
+        sys.exit(f"Could not start sign-in: {flow.get('error_description', flow)}")
+    print(flow["message"], flush=True)  # "To sign in, open https://microsoft.com/devicelogin and enter the code ..."
+    token = app.acquire_token_by_device_flow(flow)
 if "access_token" not in token:
     sys.exit(f"Could not get a BC token: {token.get('error_description', token)}")
 session = requests.Session()
