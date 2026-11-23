@@ -174,11 +174,13 @@ for r in q_tb:
 exp_tb[CLEARING_NO] = 0.0
 gl_loaded = load_workbook("out/bc_load.xlsx", read_only=True)["15 G-L Account"].max_row - 1
 
+VICTIM = None
 if BREAK:
-    # Pretend QBO said one customer owed $1.00 more. A working reconciliation must catch this.
-    victim = next(no for no, bal in exp_customer.items() if bal > 0)
-    exp_customer[victim] = round(exp_customer[victim] + 1, 2)
-    print(f"BREAK TEST: expected balance for {victim} raised by $1.00\n")
+    # Pretend QBO said one customer owed $1.00 more. A working reconciliation must catch this,
+    # and ONLY this: every other check must still pass, or the break test proves nothing.
+    VICTIM = next(no for no, bal in exp_customer.items() if bal > 0)
+    exp_customer[VICTIM] = round(exp_customer[VICTIM] + 1, 2)
+    print(f"BREAK TEST: expected balance for {VICTIM} raised by $1.00\n")
 
 bc = bc_from_api() if USE_API else bc_from_excel()
 
@@ -232,7 +234,13 @@ check("Clearing account 3900 is zero", bc["tb"].get(CLEARING_NO, 0.0), 0.0)
 passed = sum(results)
 print(f"\n{passed}/{len(results)} checks passed")
 if BREAK:
-    print("Break test " + ("WORKED: the tampered number was caught." if passed < len(results)
-                           else "DID NOT WORK: nothing failed, so the checks are too weak."))
-    sys.exit(0 if passed < len(results) else 1)
+    # The tamper touches exactly two checks: A/R total and A/R per customer.
+    if passed == len(results):
+        print("Break test DID NOT WORK: nothing failed, so the checks are too weak.")
+        sys.exit(1)
+    if passed < len(results) - 2:
+        print("Break test INCONCLUSIVE: other checks fail too. Get the normal run to all PASS first.")
+        sys.exit(1)
+    print(f"Break test WORKED: only the tampered customer {VICTIM} was caught; everything else still passes.")
+    sys.exit(0)
 sys.exit(0 if passed == len(results) else 1)
