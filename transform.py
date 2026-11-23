@@ -233,8 +233,9 @@ for inv in sorted(invoices, key=lambda i: (i["TxnDate"], i.get("DocNumber", ""))
 # A/P: one line per vendor with a balance
 for v in sorted(vendors, key=lambda v: int(v["Id"])):
     if v.get("Balance"):
+        # BC requires an External Document No. (the vendor's invoice number) on purchase invoices by default.
         gen_line(**{"Document Type": "Invoice", "Document No.": f"OB-{vend_no[v['Id']]}",
-                    "Account Type": "Vendor", "Account No.": vend_no[v["Id"]],
+                    "External Document No.": f"OB-{vend_no[v['Id']]}", "Account Type": "Vendor", "Account No.": vend_no[v["Id"]],
                     "Description": "Opening balance (QBO vendor balance)", "Amount": -round(v["Balance"], 2)})
 
 # Everything else on the trial balance, straight to G/L
