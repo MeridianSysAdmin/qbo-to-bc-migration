@@ -1,0 +1,24 @@
+QBO entity,QBO field,BC table,BC field,Transform rule,Decision needed?
+Account,(none - QBO sandbox has no account numbers),15 G/L Account,No.,Assign numbers by type: 1000s assets / 2000s liabilities / 3000s equity / 4000s income / 5000s COGS / 6000s expense / 7000s other,YES - numbering scheme (all 89 accounts have no AcctNum)
+Account,Name,15 G/L Account,Name,Copy; trim to 100 chars,
+Account,Classification,15 G/L Account,Income/Balance,Asset/Liability/Equity -> Balance Sheet; Revenue/Expense -> Income Statement,
+Account,AccountType,15 G/L Account,Account Category,Bank/AR/Other Current Asset/Fixed Asset -> Assets; AP/Credit Card/Other Current Liability/Long Term Liability -> Liabilities; Equity -> Equity; Income/Other Income -> Income; Cost of Goods Sold -> Cost of Goods Sold; Expense/Other Expense -> Expense,
+Account,SubAccount / ParentRef,15 G/L Account,Account Type + Totaling,Parent accounts become Heading/Total lines? or flatten,YES - flatten or keep hierarchy
+Account,Active,15 G/L Account,Blocked,Active=false -> Blocked=Yes (or skip inactive),YES - migrate inactive accounts?
+Account,CurrentBalance,(not loaded),,Used only for reconciliation: opening trial balance must match,
+Customer,Id,18 Customer,No.,C + Id padded (C0001) - keep QBO Id in a cross-reference column,YES - number format
+Customer,DisplayName,18 Customer,Name,Copy,
+Customer,BillAddr.Line1,18 Customer,Address,Copy,
+Customer,BillAddr.City,18 Customer,City,Copy,
+Customer,BillAddr.PostalCode,18 Customer,Post Code,Copy,
+Customer,BillAddr.CountrySubDivisionCode,18 Customer,County,Copy (state),
+Customer,PrimaryPhone.FreeFormNumber,18 Customer,Phone No.,Copy,
+Customer,PrimaryEmailAddr.Address,18 Customer,E-Mail,Copy,
+Customer,Job / ParentRef (sub-customers),18 Customer,,BC has no sub-customers,YES - merge into parent or create separate customers
+Customer,Balance,(not loaded),,Comes in through open invoices; used for reconciliation,
+Vendor,(pull first: python extract.py Vendor),23 Vendor,No. / Name / Address / Phone No. / E-Mail,Same pattern as Customer (V0001),
+Item,(pull first: python extract.py Item),27 Item,No. / Description / Type / Unit Price / Unit Cost / Base Unit of Measure,Inventory -> Inventory; Service -> Service; NonInventory -> Non-Inventory,YES - unit of measure (QBO has none; default EA?)
+Invoice (open only),Balance > 0,81 Gen. Journal Line,Amount,One opening-balance line per open invoice: Account Type=Customer; Balancing account = opening balance equity/clearing account,YES - history vs open items only (recommend open only)
+Invoice (open only),DocNumber,81 Gen. Journal Line,Document No. / External Document No.,Keep QBO invoice number so the customer recognizes it,
+Invoice (open only),TxnDate / DueDate,81 Gen. Journal Line,Document Date / Due Date,Keep original dates so aging matches,
+Invoice (open only),CustomerRef.value,81 Gen. Journal Line,Account No.,Look up the new BC customer No. via cross-reference,
