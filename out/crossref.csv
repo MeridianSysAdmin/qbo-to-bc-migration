@@ -1,0 +1,157 @@
+Entity,QBO Id,BC No.,Name
+G/L Account,35,1000,Checking
+G/L Account,36,1010,Savings
+G/L Account,84,1020,Accounts Receivable (A/R)
+G/L Account,81,1030,Inventory Asset
+G/L Account,3,1040,Prepaid Expenses
+G/L Account,32,1050,Uncategorized Asset
+G/L Account,4,1060,Undeposited Funds
+G/L Account,39,1080,Depreciation
+G/L Account,38,1090,Original Cost
+G/L Account,33,2000,Accounts Payable (A/P)
+G/L Account,41,2010,Mastercard
+G/L Account,42,2020,Visa
+G/L Account,89,2030,Arizona Dept. of Revenue Payable
+G/L Account,90,2040,Board of Equalization Payable
+G/L Account,43,2050,Loan Payable
+G/L Account,44,2060,Notes Payable
+G/L Account,34,3000,Opening Balance Equity
+G/L Account,2,3010,Retained Earnings
+G/L Account,85,4000,Billable Expense Income
+G/L Account,82,4010,Design income
+G/L Account,86,4020,Discounts given
+G/L Account,5,4030,Fees Billed
+G/L Account,45,4050,Landscaping Services - Other
+G/L Account,47,4070,Decks and Patios
+G/L Account,48,4080,Fountains and Garden Lighting
+G/L Account,49,4090,Plants and Soil
+G/L Account,50,4100,Sprinklers and Drip Systems
+G/L Account,52,4130,Installation
+G/L Account,53,4140,Maintenance and Repair
+G/L Account,83,4170,Other Income
+G/L Account,54,4180,Pest Control Services
+G/L Account,6,4190,Refunds-Allowances
+G/L Account,79,4200,Sales of Product Income
+G/L Account,1,4210,Services
+G/L Account,87,4220,Unapplied Cash Payment Income
+G/L Account,30,4230,Uncategorized Income
+G/L Account,80,5000,Cost of Goods Sold
+G/L Account,7,6000,Advertising
+G/L Account,55,6020,Automobile - Other
+G/L Account,56,6030,Fuel
+G/L Account,8,6050,Bank Charges
+G/L Account,9,6060,Commissions & fees
+G/L Account,28,6070,Disposal Fees
+G/L Account,10,6080,Dues & Subscriptions
+G/L Account,29,6090,Equipment Rental
+G/L Account,11,6110,Insurance - Other
+G/L Account,57,6120,Workers Compensation
+G/L Account,58,6150,Job Expenses - Other
+G/L Account,60,6170,Installation
+G/L Account,61,6180,Maintenance and Repairs
+G/L Account,62,6200,Equipment Rental
+G/L Account,64,6220,Decks and Patios
+G/L Account,65,6230,Fountain and Garden Lighting
+G/L Account,66,6240,Plants and Soil
+G/L Account,67,6250,Sprinklers and Drip Systems
+G/L Account,68,6270,Permits
+G/L Account,12,6300,Legal & Professional Fees - Other
+G/L Account,69,6310,Accounting
+G/L Account,70,6320,Bookkeeper
+G/L Account,71,6330,Lawyer
+G/L Account,72,6360,Maintenance and Repair - Other
+G/L Account,73,6370,Building Repairs
+G/L Account,74,6380,Computer Repairs
+G/L Account,75,6390,Equipment Repairs
+G/L Account,13,6410,Meals and Entertainment
+G/L Account,15,6420,Office Expenses
+G/L Account,16,6430,Promotional
+G/L Account,78,6440,Purchases
+G/L Account,17,6450,Rent or Lease
+G/L Account,19,6460,Stationery & Printing
+G/L Account,20,6470,Supplies
+G/L Account,21,6480,Taxes & Licenses
+G/L Account,22,6490,Travel
+G/L Account,23,6500,Travel Meals
+G/L Account,88,6510,Unapplied Cash Bill Payment Expense
+G/L Account,31,6520,Uncategorized Expense
+G/L Account,76,6540,Gas and Electric
+G/L Account,77,6550,Telephone
+G/L Account,25,7000,Interest Earned
+G/L Account,26,7010,Other Portfolio Income
+G/L Account,40,7020,Depreciation
+G/L Account,14,7030,Miscellaneous
+G/L Account,27,7040,Penalties & Settlements
+Customer,1,C0001,Amy's Bird Sanctuary
+Customer,2,C0002,Bill's Windsurf Shop
+Customer,3,C0003,Cool Cars
+Customer,4,C0004,Diego Rodriguez
+Customer,5,C0005,Dukes Basketball Camp
+Customer,6,C0006,Dylan Sollfrank
+Customer,7,C0007,Freeman Sporting Goods
+Customer,8,C0008,0969 Ocean View Road
+Customer,9,C0009,55 Twin Lane
+Customer,10,C0010,Geeta Kalapatapu
+Customer,11,C0011,Gevelber Photography
+Customer,12,C0012,Jeff's Jalopies
+Customer,13,C0013,John Melton
+Customer,14,C0014,Kate Whelan
+Customer,15,C0015,Pye's Cakes
+Customer,16,C0016,Kookies by Kathy
+Customer,17,C0017,Mark Cho
+Customer,18,C0018,Paulsen Medical Supplies
+Customer,19,C0019,Rago Travel Agency
+Customer,20,C0020,Red Rock Diner
+Customer,21,C0021,Rondonuwu Fruit and Vegi
+Customer,22,C0022,Shara Barnett
+Customer,23,C0023,Barnett Design
+Customer,24,C0024,Sonnenschein Family Store
+Customer,25,C0025,Sushi by Katsuyuki
+Customer,26,C0026,Travis Waldron
+Customer,27,C0027,Video Games by Dan
+Customer,28,C0028,Wedding Planning by Whitney
+Customer,29,C0029,Weiskopf Consulting
+Vendor,30,V0030,Books by Bessie
+Vendor,31,V0031,Brosnahan Insurance Agency
+Vendor,32,V0032,Cal Telephone
+Vendor,33,V0033,Chin's Gas and Oil
+Vendor,34,V0034,Cigna Health Care
+Vendor,35,V0035,Computers by Jenni
+Vendor,36,V0036,Diego's Road Warrior Bodyshop
+Vendor,37,V0037,EDD
+Vendor,38,V0038,Ellis Equipment Rental
+Vendor,39,V0039,Fidelity
+Vendor,40,V0040,Hall Properties
+Vendor,41,V0041,Hicks Hardware
+Vendor,42,V0042,Lee Advertising
+Vendor,43,V0043,Mahoney Mugs
+Vendor,44,V0044,Met Life Dental
+Vendor,45,V0045,National Eye Care
+Vendor,46,V0046,Norton Lumber and Building Materials
+Vendor,47,V0047,Pam Seitz
+Vendor,48,V0048,PG&E
+Vendor,49,V0049,Robertson & Associates
+Vendor,50,V0050,Tania's Nursery
+Vendor,51,V0051,Tim Philip Masonry
+Vendor,52,V0052,Tony Rondonuwu
+Vendor,53,V0053,United States Treasury
+Vendor,56,V0056,Bob's Burger Joint
+Vendor,57,V0057,Squeaky Kleen Car Wash
+Item,1,I0001,Services
+Item,2,I0002,Hours
+Item,3,I0003,Concrete
+Item,4,I0004,Design
+Item,5,I0005,Rock Fountain
+Item,6,I0006,Gardening
+Item,7,I0007,Installation
+Item,8,I0008,Lighting
+Item,9,I0009,Maintenance & Repair
+Item,10,I0010,Pest Control
+Item,11,I0011,Pump
+Item,12,I0012,Refunds & Allowances
+Item,13,I0013,Rocks
+Item,14,I0014,Sod
+Item,15,I0015,Soil
+Item,16,I0016,Sprinkler Heads
+Item,17,I0017,Sprinkler Pipes
+Item,18,I0018,Trimming
