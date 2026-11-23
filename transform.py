@@ -14,7 +14,9 @@ How the opening balances work (plain version):
 - Every line balances against 3900 Opening Balance Clearing. If the migration is right, 3900 ends at exactly 0.
 """
 import csv
+import datetime as dt
 import json
+import re
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -271,6 +273,13 @@ for name, got, want in checks:
     print(f"{'PASS' if passed else 'FAIL'}  {name}: {got} vs {want}")
 
 # ---------------------------------------------------------------- output
+def cell(v):
+    """Excel needs real dates, not 'YYYY-MM-DD' text, or BC reads them in the wrong format."""
+    if isinstance(v, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", v):
+        return dt.date.fromisoformat(v)
+    return v
+
+
 TABLES = [  # (BC table ID, table name, rows) in the order BC must import them
     (204, "Unit of Measure", setup["Unit of Measure"]),
     (15, "G/L Account", gl_rows),
@@ -295,7 +304,7 @@ for table_id, name, rows in TABLES:
     headers = [h for h in rows[0] if h != "QBO Id"]
     ws.append(headers)
     for r in rows:
-        ws.append([r[h] for h in headers])
+        ws.append([cell(r[h]) for h in headers])
 wb.save(OUT / "bc_load.xlsx")
 
 with open(OUT / "crossref.csv", "w", newline="", encoding="utf-8") as f:
@@ -346,7 +355,7 @@ def fill_template(path):
             print(f"  ! sheet '{ws.title}': package is missing fields {sorted(missing_cols)}")
         for i, row in enumerate(rows, start=header_row + 1):
             for h, c in cols.items():
-                ws.cell(i, c).value = row[h]
+                ws.cell(i, c).value = cell(row[h])
         print(f"  filled '{ws.title}': {len(rows)} rows")
     out = OUT / "package_filled.xlsx"
     tpl.save(out)
