@@ -136,7 +136,7 @@ def bc_from_api():
     accounts, customers = get_all(f"{api}/accounts"), get_all(f"{api}/customers")
     vendors, items = get_all(f"{api}/vendors"), get_all(f"{api}/items")
     tb = {}
-    for r in get_all(f"{api}/trialBalance"):
+    for r in get_all(f"{api}/trialBalances"):
         if r.get("number"):
             tb[r["number"]] = round(num(r.get("balanceAtDateDebit")) - num(r.get("balanceAtDateCredit")), 2)
     return {
