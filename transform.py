@@ -331,7 +331,8 @@ def fill_template(path):
     Each sheet in the export is one table. We find the header row by matching field captions,
     then write our rows underneath. Columns we don't have are left blank.
     """
-    def key(s):  # sheet titles lose characters like "/" and get cut at 31 chars
+    def key(s):  # BC sheet titles may start with the table ID, lose "/" and get cut at 31 chars
+        s = re.sub(r"^\s*\d+\s+", "", s)
         return "".join(ch for ch in s.lower() if ch.isalnum())[:20]
 
     tpl = load_workbook(path)
