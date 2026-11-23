@@ -342,9 +342,16 @@ def fill_template(path):
             print(f"  skip sheet '{ws.title}' (no data for it)")
             continue
         wanted = {h for h in rows[0] if h != "QBO Id"}
+        # US Business Central shows some fields under different captions.
+        alias = {"ZIP Code": "Post Code", "State": "County", "Email": "E-Mail"}
         header_row, cols = None, {}
         for r in range(1, 6):
-            found = {ws.cell(r, c).value: c for c in range(1, ws.max_column + 1) if ws.cell(r, c).value in wanted}
+            found = {}
+            for c in range(1, ws.max_column + 1):
+                v = ws.cell(r, c).value
+                v = alias.get(v, v)
+                if v in wanted:
+                    found[v] = c
             if len(found) > len(cols):
                 header_row, cols = r, found
         if not cols:
