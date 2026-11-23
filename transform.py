@@ -328,45 +328,85 @@ print(f"Wrote {OUT / 'bc_load.xlsx'} and {OUT / 'crossref.csv'}")
 def fill_template(path):
     """Fill the Excel file exported from a BC Configuration Package.
 
-    Each sheet in the export is one table. We find the header row by matching field captions,
-    then write our rows underneath. Columns we don't have are left blank.
+    BC's export carries an XML map that ties each column to a field. Libraries like openpyxl drop
+    that map on save (BC then says "The Excel workbook must contain an XML map"), so we edit the
+    sheet XML inside the .xlsx directly and copy every other part untouched.
     """
+    import zipfile
+    from xml.sax.saxutils import escape
+
     def key(s):  # BC sheet titles may start with the table ID, lose "/" and get cut at 31 chars
         s = re.sub(r"^\s*\d+\s+", "", s)
         return "".join(ch for ch in s.lower() if ch.isalnum())[:20]
 
-    tpl = load_workbook(path)
+    def text(v):
+        if v is None:
+            return ""
+        if isinstance(v, float):
+            return f"{v:.2f}".rstrip("0").rstrip(".") if v != int(v) else str(int(v))
+        return str(v)  # dates stay ISO "YYYY-MM-DD", which is what the map's xsd:date expects
+
+    def col_letters(ref):
+        return re.match(r"[A-Z]+", ref).group(0)
+
+    alias = {"ZIP Code": "Post Code", "State": "County", "Email": "E-Mail"}
     by_name = {key(name): rows for _, name, rows in TABLES}
-    for ws in tpl.worksheets:
-        rows = by_name.get(key(ws.title))
+
+    src = zipfile.ZipFile(path)
+    parts = {n: src.read(n) for n in src.namelist()}
+    infos = {n: src.getinfo(n) for n in src.namelist()}
+
+    wb_xml = parts["xl/workbook.xml"].decode("utf-8-sig")
+    rels = parts["xl/_rels/workbook.xml.rels"].decode("utf-8-sig")
+    rel_target = dict(re.findall(r'Id="([^"]+)"[^>]*Target="([^"]+)"', rels))
+    rel_target.update({i: t for t, i in re.findall(r'Target="([^"]+)"[^>]*Id="([^"]+)"', rels)})
+
+    for title, rid in re.findall(r'<x:sheet name="([^"]+)"[^>]*r:id="([^"]+)"', wb_xml):
+        title = title.replace("&amp;", "&")
+        rows = by_name.get(key(title))
         if rows is None:
-            print(f"  skip sheet '{ws.title}' (no data for it)")
+            print(f"  skip sheet '{title}' (no data for it)")
             continue
+        sheet_path = "xl/" + rel_target[rid].lstrip("/").removeprefix("xl/")
+        sheet = parts[sheet_path].decode("utf-8-sig")
+
+        header = re.search(r'<x:row r="3">(.*?)</x:row>', sheet).group(1)
+        cols = []  # (column letter, our field or None)
+        for ref, caption in re.findall(r'<x:c r="([A-Z]+)3"[^>]*>.*?<x:t[^>]*>(.*?)</x:t>', header):
+            caption = alias.get(caption, caption)
+            cols.append((ref, caption))
         wanted = {h for h in rows[0] if h != "QBO Id"}
-        # US Business Central shows some fields under different captions.
-        alias = {"ZIP Code": "Post Code", "State": "County", "Email": "E-Mail"}
-        header_row, cols = None, {}
-        for r in range(1, 6):
-            found = {}
-            for c in range(1, ws.max_column + 1):
-                v = ws.cell(r, c).value
-                v = alias.get(v, v)
-                if v in wanted:
-                    found[v] = c
-            if len(found) > len(cols):
-                header_row, cols = r, found
-        if not cols:
-            print(f"  ! sheet '{ws.title}': no matching headers, check the package field list")
-            continue
-        missing_cols = wanted - set(cols)
-        if missing_cols:
-            print(f"  ! sheet '{ws.title}': package is missing fields {sorted(missing_cols)}")
-        for i, row in enumerate(rows, start=header_row + 1):
-            for h, c in cols.items():
-                ws.cell(i, c).value = cell(row[h])
-        print(f"  filled '{ws.title}': {len(rows)} rows")
+        have = {c for _, c in cols}
+        missing = wanted - have
+        if missing:
+            print(f"  ! sheet '{title}': package is missing fields {sorted(missing)}")
+
+        new_rows = []
+        for i, row in enumerate(rows, start=4):
+            cells = "".join(
+                f'<x:c r="{ref}{i}" s="1" t="inlineStr"><x:is><x:t xml:space="preserve">'
+                f'{escape(text(row.get(cap)) if cap in wanted else "")}</x:t></x:is></x:c>'
+                for ref, cap in cols)
+            new_rows.append(f'<x:row r="{i}">{cells}</x:row>')
+        # Drop the empty data row(s) BC exported and put ours after the header row.
+        sheet = re.sub(r'<x:row r="(?:[4-9]|\d{2,})">.*?</x:row>', "", sheet, flags=re.S)
+        sheet = sheet.replace("</x:sheetData>", "".join(new_rows) + "</x:sheetData>", 1)
+        parts[sheet_path] = sheet.encode("utf-8")
+
+        # Stretch the table (and its filter) so the XML map covers every new row.
+        last_col, last_row = cols[-1][0], 3 + len(rows)
+        sheet_rels = parts[sheet_path.replace("worksheets/", "worksheets/_rels/") + ".rels"].decode("utf-8-sig")
+        for target in re.findall(r'Target="([^"]*tables/table\d+\.xml)"', sheet_rels):
+            tpath = "xl/tables/" + target.split("tables/")[-1]
+            t = parts[tpath].decode("utf-8-sig")
+            t = re.sub(r'ref="A3:[A-Z]+\d+"', f'ref="A3:{last_col}{last_row}"', t)
+            parts[tpath] = t.encode("utf-8")
+        print(f"  filled '{title}': {len(rows)} rows")
+
     out = OUT / "package_filled.xlsx"
-    tpl.save(out)
+    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as dst:
+        for n, data in parts.items():
+            dst.writestr(infos[n], data, compress_type=zipfile.ZIP_DEFLATED)
     print(f"Wrote {out}")
 
 
