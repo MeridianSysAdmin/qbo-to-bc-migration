@@ -170,7 +170,8 @@ def party_row(p, prefix, posting_group_field):
         "Post Code": addr.get("PostalCode", "")[:20],
         "County": addr.get("CountrySubDivisionCode", "")[:30],
         "Phone No.": p.get("PrimaryPhone", {}).get("FreeFormNumber", "")[:30],
-        "E-Mail": p.get("PrimaryEmailAddr", {}).get("Address", "")[:80],
+        # QBO allows "a@x.com, b@x.com"; BC only accepts several addresses separated by ";".
+        "E-Mail": ";".join(e.strip() for e in re.split(r"[,;]", p.get("PrimaryEmailAddr", {}).get("Address", "")) if e.strip())[:80],
         posting_group_field: "DOMESTIC",
         "QBO Id": p["Id"],
     }
